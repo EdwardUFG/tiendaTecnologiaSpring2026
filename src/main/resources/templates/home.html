@@ -20,12 +20,21 @@
         <h2 class="mb-4">Catálogo de Productos</h2>
         <div class="row row-cols-1 row-cols-md-3 g-4">
             <div class="col" th:each="prod : ${productos}">
-                <div class="card h-100 shadow-sm">
+               <div class="card h-100 shadow-sm border-0">
+                    <img th:if="${prod.imagen != null and prod.imagen != ''}" 
+                         th:src="@{/imagenes/{img} (img=${prod.imagen})}" 
+                         class="card-img-top" alt="Foto" 
+                         style="height: 220px; object-fit: contain; padding: 1rem; background-color: #fff;">
+                         
+                    <div th:unless="${prod.imagen != null and prod.imagen != ''}" class="bg-light text-center py-5 rounded-top">
+                         <span style="font-size: 4rem;">📦</span>
+                    </div>
+
                     <div class="card-body">
-                        <h5 class="card-title" th:text="${prod.nombre}">Nombre Producto</h5>
-                        <p class="card-text text-muted" th:text="${prod.descripcion}">Descripcion corta</p>
+                        <h5 class="card-title text-truncate" th:text="${prod.nombre}">Nombre Producto</h5>
+                        <p class="card-text text-muted small text-truncate" th:text="${prod.descripcion}">Descripcion corta</p>
                         <span class="badge bg-secondary mb-2" th:text="${prod.categoria != null ? prod.categoria.nombre : 'Sin categoria'}">Categoria</span>
-                        <h4 class="text-primary" th:text="'$' + ${prod.precio}">$0.00</h4>
+                        <h4 class="text-primary fw-bold" th:text="'$' + ${prod.precio}">$0.00</h4>
                     </div>
                 </div>
             </div>

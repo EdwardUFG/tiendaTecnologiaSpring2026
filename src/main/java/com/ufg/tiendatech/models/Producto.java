@@ -1,6 +1,8 @@
 package com.ufg.tiendatech.models;
 
 import java.util.Date;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,6 +20,7 @@ public class Producto {
     private Integer id;
     
     private String nombre;
+    @Column(length = 1000)
     private String descripcion;
     private double precio;
     private int destacado; 
