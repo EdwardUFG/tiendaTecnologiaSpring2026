@@ -12,7 +12,6 @@ import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -43,13 +42,10 @@ public class ProductoController {
         return "productos/listProductos";
     }
 
-
     @GetMapping("/create")
     public String crear(Producto producto, Model model, RedirectAttributes attributes) {
-       
         List<Categoria> listaCategorias = serviceCategorias.buscarTodas();
         
-       
         if (listaCategorias.isEmpty()) {
             attributes.addFlashAttribute("alerta", "¡Alto ahí! Debes crear al menos una categoría antes de poder registrar un producto.");
             return "redirect:/categorias/index";
@@ -58,30 +54,25 @@ public class ProductoController {
         model.addAttribute("categorias", listaCategorias);
         return "productos/formProducto";
     }
-  
+
     @PostMapping("/save")
     public String guardar(Producto producto, BindingResult result, Model model, 
-                          @RequestParam("archivoImagen") MultipartFile multiPart) {
+                          @RequestParam(value = "archivoImagen", required = false) MultipartFile multiPart) {
 
         if (result.hasErrors()) {
             model.addAttribute("categorias", serviceCategorias.buscarTodas());
             return "productos/formProducto";
         }
 
-        if (!multiPart.isEmpty()) {
-    
+        if (multiPart != null && !multiPart.isEmpty()) {
             String ruta = "C://proyectosSQL//imagenes//"; 
-
             try {
                 byte[] bytes = multiPart.getBytes();
                 Path rutaAbsoluta = Paths.get(ruta + multiPart.getOriginalFilename());
-
                 Files.createDirectories(Paths.get(ruta)); 
-
                 Files.write(rutaAbsoluta, bytes);
-
+                
                 producto.setImagen(multiPart.getOriginalFilename());
-
             } catch (Exception e) {
                 System.out.println("Error al subir la imagen: " + e.getMessage());
             }
@@ -98,7 +89,6 @@ public class ProductoController {
         webDataBinder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
     }
 
-
     @GetMapping("/detalle/{id}")
     public String mostrarDetalle(@PathVariable("id") Integer idProducto, Model model) {
         Producto producto = serviceProductos.buscarPorId(idProducto);
@@ -109,5 +99,29 @@ public class ProductoController {
         
         model.addAttribute("producto", producto);
         return "productos/detalleProducto"; 
+    }
+
+    @GetMapping("/edit/{id}")
+    public String editar(@PathVariable("id") Integer idProducto, Model model) {
+        Producto producto = serviceProductos.buscarPorId(idProducto);
+        
+        if (producto == null) {
+            return "redirect:/productos/index";
+        }
+        
+        if (producto.getCategoria() == null) {
+            producto.setCategoria(new Categoria());
+        }
+        
+        model.addAttribute("producto", producto);
+        model.addAttribute("categorias", serviceCategorias.buscarTodas()); 
+        
+        return "productos/formProducto"; 
+    }       
+
+    @GetMapping("/delete/{id}")
+    public String eliminar(@PathVariable("id") Integer idProducto) {
+        serviceProductos.eliminar(idProducto);
+        return "redirect:/productos/index";
     }
 }
